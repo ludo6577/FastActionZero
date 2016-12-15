@@ -8,8 +8,16 @@ public class Player : MonoBehaviour {
     public float sensitivityX = 5f;
     public float sensitivityY = 5f;
 
+    // 2) Checkpoint
     public GameObject lastCheckPoint;
+
+    // 4) Too fast? Add fading
     public Image FadeMask;
+
+    // 4) Still too fast? Add cursor 
+    public Image Cursor;
+
+
 
 	// Use this for initialization
 	void Start () {	}
@@ -26,43 +34,61 @@ public class Player : MonoBehaviour {
             transform.eulerAngles = new Vector3(curr.x - mouseY, curr.y + mouseX, curr.z);
         }
 
-        //2) Cast ray from camera
+        // 2) Cast ray from camera
 	    Ray ray = Camera.main.ViewportPointToRay (new Vector3(0.5f, 0.5f, 0f));        
         RaycastHit hit;
         if (Physics.Raycast(ray, out hit))
         {
-            var gameObject = hit.collider.gameObject;
-            var teleport = gameObject.GetComponent<Teleport>();
+
+            //3) Teleport
+            var teleport = hit.collider.gameObject.GetComponent<Teleport>();
             if (teleport != null)
             {
-                Teleport(gameObject.transform.position);
+                // 4) Add cursor
+                if (Cursor.fillAmount > 0f)
+                {
+                    Cursor.fillAmount -= 0.1f;
+                }
+                else
+                {
+                    Cursor.fillAmount = 1f;
 
-                if (lastCheckPoint != null)
-                    lastCheckPoint.SetActive(false);
-                lastCheckPoint = gameObject;
+                    Teleport(teleport.transform.position);
+                    
+                    if (lastCheckPoint != null)
+                        lastCheckPoint.SetActive(true);
+                    teleport.gameObject.SetActive(false);
+                    lastCheckPoint = teleport.gameObject;
+                }
             }
+        }
+        else
+        {
+            // 4) Add cursor
+            if (Cursor.fillAmount < 1f)
+                Cursor.fillAmount += 0.1f;
         }
 	}
 
-    //3) Teleport
     private void Teleport(Vector3 position)
     {
         //transform.position = position;
+
         StartCoroutine(TeleportCoroutine(position));
     }
 
-    //4) Add Fadeplane With fadeplane
+    //4) Add Fadeplane
     private IEnumerator TeleportCoroutine(Vector3 position)
     {
-        while (FadeMask.color.a <= 1)
+        while (FadeMask.color.a < 1)
         {
             FadeMask.color = new Color(FadeMask.color.r, FadeMask.color.g, FadeMask.color.b, FadeMask.color.a + 0.1f);
             yield return new WaitForEndOfFrame();
         }
-        Debug.Log(FadeMask.color    );
+
         transform.position = position;
 
-        while (FadeMask.color.a >= 0)
+        while (FadeMask.color.a > 0)
         {
             FadeMask.color = new Color(FadeMask.color.r, FadeMask.color.g, FadeMask.color.b, FadeMask.color.a - 0.1f);
             yield return new WaitForEndOfFrame();
