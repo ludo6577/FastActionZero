@@ -9,14 +9,16 @@ public class Player : MonoBehaviour {
     public float sensitivityY = 5f;
 
     // 2) Checkpoint
-    public GameObject lastCheckPoint;
+    private GameObject lastCheckPoint;
 
     // 4) Too fast? Add fading
     public Image FadeMask;
 
-    // 4) Still too fast? Add cursor 
+    // 5) Still too fast? Add cursor 
     public Image Cursor;
 
+    // 6) Shoot
+    public GameObject Projectile;
 
 
 	// Use this for initialization
@@ -44,7 +46,7 @@ public class Player : MonoBehaviour {
             var teleport = hit.collider.gameObject.GetComponent<Teleport>();
             if (teleport != null)
             {
-                // 4) Add cursor
+                // 5) Add cursor
                 if (Cursor.fillAmount > 0f)
                 {
                     Cursor.fillAmount -= 0.1f;
@@ -61,13 +63,25 @@ public class Player : MonoBehaviour {
                     lastCheckPoint = teleport.gameObject;
                 }
             }
+            else
+            {
+                // 4) Add cursor
+                if (Cursor.fillAmount < 1f)
+                    Cursor.fillAmount += 0.1f;
+            }
         }
-        else
-        {
-            // 4) Add cursor
-            if (Cursor.fillAmount < 1f)
-                Cursor.fillAmount += 0.1f;
-        }
+
+        // 6) Shoot
+	    if (Input.GetMouseButtonDown(0))
+	    {
+	        var projectile = Instantiate(Projectile, transform.position, transform.rotation);
+            Destroy(projectile, 2f);
+
+            Debug.Log(transform.forward);
+
+            var rigidBody = projectile.GetComponent<Rigidbody>();
+	        rigidBody.AddForce(transform.forward * 50f, ForceMode.Impulse);
+	    }
 	}
 
     private void Teleport(Vector3 position)
