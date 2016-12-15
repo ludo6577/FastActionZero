@@ -71,7 +71,7 @@ public class Player : MonoBehaviour {
             }
         }
 
-        // 6) Shoot
+        // 6) Shoot (mouse click = touch on gearVR pad)
 	    if (Input.GetMouseButtonDown(0))
 	    {
 	        var projectile = Instantiate(Projectile, transform.position, transform.rotation);
